@@ -1,0 +1,6 @@
+import { getAuth, signInWithCredential, signInWithCustomToken, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider} from 'firebase/auth';
+import { getDatabase, ref, set, onValue, forEach, push } from "firebase/database";
+import app from '../firebaseConfig'
+
+const db = getDatabase()
+const auth = getAuth(app)
