@@ -446,7 +446,7 @@ export function FleurProvider({children, navigation}) {
             setFleurResponse(false)
             var myHeaders = new Headers();
       
-            myHeaders.append("Authorization", "Bearer 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");
+            myHeaders.append("Authorization", "Chat GPT-4 Token");
             myHeaders.append("Content-Type", "application/json");
     
             var raw = JSON.stringify({
@@ -501,7 +501,7 @@ export function FleurProvider({children, navigation}) {
         setFleurResponse(false)
         var myHeaders = new Headers();
   
-        myHeaders.append("Authorization", "Bearer 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");
+        myHeaders.append("Authorization", "Chat GPT-4 Token");
         myHeaders.append("Content-Type", "application/json");
 
         var raw = JSON.stringify({
@@ -563,7 +563,7 @@ export function FleurProvider({children, navigation}) {
       setFleurResponse(false)
       var myHeaders = new Headers();
 
-      myHeaders.append("Authorization", "Bearer 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");
+      myHeaders.append("Authorization", "Chat GPT-4 Token");
       myHeaders.append("Content-Type", "application/json");
 
       var raw = JSON.stringify({
