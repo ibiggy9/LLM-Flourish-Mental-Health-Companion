@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "340004188318-r13acpb0kgo4du78daqvl8noq1sqjfc9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.flourish.theFlourishApplication",
+            "certificate_hash": "36fce6a941e2948a196bfdca3cd3056546a27603"
+          }
+        },
+        {
           "client_id": "340004188318-qpr2s5494cub5l17c3ocbh3s9j1msfgu.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -32,10 +40,10 @@
               "client_type": 3
             },
             {
-              "client_id": "340004188318-80tnna44pfmlck64079niom4i1bji27g.apps.googleusercontent.com",
+              "client_id": "340004188318-cmvqrd4pqgn5ggbk2ft3stf6lb81jp5l.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.company.brainBiteDev"
+                "bundle_id": "com.flourish.theFlourishApplication"
               }
             }
           ]

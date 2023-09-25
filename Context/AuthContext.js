@@ -27,11 +27,12 @@ export function useAuth(){
 }   
 
 export function AuthProvider({children, navigation}) {
-    
+    const [isFleur, setIsFleur] = useState(false)
+    const [chatMenuShow, setChatMenuShow] = useState(true)
     const [firstLogin, setFirstLogin] = useState(false)
     const [user, setUser] = useState()
     const [loginError, setLoginError] = useState()
-    const { setIsSignedIn } = useContext(AppContext)
+    
     const auth = getAuth(app)
     const appState = React.useRef(AppState.currentState);
     const [appStateVisible, setAppStateVisible] = useState(appState.current);
@@ -92,6 +93,8 @@ export function AuthProvider({children, navigation}) {
         loginError,
         setLoginError, 
         auth,
+        chatMenuShow,
+        setChatMenuShow
         
     }
 

@@ -7,6 +7,7 @@ import BackButton from '../../Components/BackButton';
 import { LinearGradient } from 'expo-linear-gradient';
 import InstructionSlider from '../../Components/ExerciseComponents/InstructionSlider';
 import analytics from '@react-native-firebase/analytics';
+import MarginWrapper from '../MarginWrapper';
 
 export default function Quiz({navigation}) {
   const [instructions, setInstructions] = useState(true)
@@ -208,7 +209,7 @@ function scoringChange(e, qNum, option_num){
   }
 
   async function saveScore(){
-    await analytics().logEvent("severityQuizResults",{anxiety:anxietyScore ,depression:depressionScore})
+    await analytics().logEvent(`adQuizResults_a${anxietyScore}_d:${depressionScore}`,{anxiety:anxietyScore, depression:depressionScore})
   }
  
   useEffect(()=>{
@@ -218,18 +219,20 @@ function scoringChange(e, qNum, option_num){
   },[step])
 
   return (
-    <View style={{width:width, height:height}}>
+    <View style={[tw`flex-1 ${Platform.OS=="android" && `bg-black`}`,{width:width, height:height}]}>
+      <MarginWrapper>
+      {Platform.OS != 'android' &&
     <LinearGradient 
     
-    colors={['#27178C','#8C4917']}
+    colors={['#182E77','#EA1D3F']}
     start={{x:0.05, y:0.6}}
     end={{x:0.9, y:0.3}}
     locations={[0.1,0.99]}
     
     
     style={{width:width, height:height, opacity:0.65}}
-    >
-    </LinearGradient>
+    />
+    }
     <View style={[tw`flex-1 justify-start`,{height:height, width:width, opacity:1, position:'absolute'}]}>
   
   
@@ -354,6 +357,7 @@ function scoringChange(e, qNum, option_num){
   }
     
     </View>
+    </MarginWrapper>
     </View>
   )
   

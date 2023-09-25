@@ -1,52 +1,64 @@
-//Custom hook for checking rev state
-import React, {useEffect, useState} from 'react'
-import Purchases, {CustomerInfo, PurchasesOffering} from 'react-native-purchases'
+import React, { useEffect, useState } from 'react';
+import { Platform } from 'react-native';
+import Purchases, { CustomerInfo, PurchasesOffering } from 'react-native-purchases';
 
 const APIKeys = {
-    apple:'appl_qtsGzWhuxYbwkXHjjmDQFBfidAS',
-    google:'',
+  apple: 'appl_qtsGzWhuxYbwkXHjjmDQFBfidAS',
+  google: 'goog_CeNURIuzEJvPZOcGzpTtcayDDnP',
+};
+
+const membershipTypes = {
+  appleMonthly:'proMonthly',
+  appleAnnually:'proYearly',
+  androidMonthly:"pro_monthly_android",
+  androidAnnually:"pro_annual_android",
+  
 }
 
-const typesOfMembership = {
-    monthly: 'proMonthly',
-    yearly: 'proYearly'
-}
+function useRevHook() {
+  
+  const [currentOffering, setCurrentOffering] = useState(PurchasesOffering);
+  const [customerInfo, setCustomerInfo] = useState(CustomerInfo);
+  const isProMember = customerInfo?.entitlements.active.pro
 
-function useRevHook(){
-    const [currentOffering, setCurrentOffering] = useState()
-    const [customerInfo, setCustomerInfo] = useState()
-    const [entInfo, setEntInfo] = useState()
+  /*
+    customerInfo?.activeSubscriptions.includes(membershipTypes.appleMonthly) ||
+    customerInfo?.activeSubscriptions.includes(membershipTypes.appleAnnually) ||
+    customerInfo?.activeSubscriptions.includes(membershipTypes.androidMonthly) ||
+    customerInfo?.activeSubscriptions.includes(membershipTypes.androidAnnually) 
+  */
+  
 
-    const isSubscriber = customerInfo?.activeSubscriptions.includes('pro')  
-    const isProMember= customerInfo?.entitlements.active.pro
-    const membershipLevel = customerInfo?.entitlements
+  useEffect(() => {
+    const fetchData = async () => {
+      Purchases.setLogLevel(Purchases.LOG_LEVEL.DEBUG)
       
+      if(Platform.OS == 'ios'){  
+        await Purchases.configure({ apiKey: APIKeys.apple });
+      } else {
+        await Purchases.configure({apiKey: APIKeys.google})
+      }
 
-    useEffect(()=> {
-        const fetchData = async () => {
-            Purchases.configure({apiKey: APIKeys.apple})
-            
-            //From revCat
-            const offerings = await Purchases.getOfferings()
-            const customerInfo = await Purchases.getCustomerInfo()
+      // From revCat
+      const offerings = await Purchases.getOfferings();
+      const customerInfo = await Purchases.getCustomerInfo();
+      
+      setCustomerInfo(customerInfo);
+      setCurrentOffering(offerings.current);
 
-            setCustomerInfo(customerInfo)
-            setCurrentOffering(offerings.current)
+    };
+    fetchData().catch(console.error);
+  }, []);
 
-        }
-        fetchData().catch(console.error)
-        
-    }, [])
+  useEffect(() => {
+    const customerInfoUpdated = async (purchaserInfo) => {
+      setCustomerInfo(purchaserInfo);
+    };
+    
+    Purchases.addCustomerInfoUpdateListener(customerInfoUpdated);
+  }, []);
 
-    useEffect(()=> {
-        const customerInfoUpdated = async (purchaserInfo) => {
-            setCustomerInfo(purchaserInfo)
-        }
-        Purchases.addCustomerInfoUpdateListener(customerInfoUpdated)
-
-    }, [])
-
-    return { currentOffering, customerInfo, isProMember, membershipLevel}
-
+  return { currentOffering, customerInfo, isProMember};
 }
-export default useRevHook
+
+export default useRevHook;

@@ -5,6 +5,8 @@ import { getStorage } from 'firebase/storage'
 import {getFirestore, Timestamp, FieldValue} from 'firebase/firestore'
 import { getAuth } from 'firebase/auth'
 import { getDatabase} from 'firebase/database'
+import analytics from '@react-native-firebase/analytics';
+
 
 const firebaseConfig = {
   apiKey: "AIzaSyCI-TNlmwgmWB9zqg981FoCo_Yya-XcLoI",
@@ -21,7 +23,7 @@ const firebaseConfig = {
 
 
 export const app = initializeApp(firebaseConfig)
-export const analytics = getAnalytics(app)
+export const firebaseAnalytics = analytics();
 
 
 

@@ -2,10 +2,19 @@
   "expo": {
     "name": "Flourish",
     "slug": "floursh-app",
+    "scheme": "floursh-app",
     "plugins": [
       "expo-apple-authentication",
       "@react-native-firebase/app",
       "@react-native-firebase/perf",
+      "@react-native-google-signin/google-signin",
+      
+      [
+      "expo-screen-orientation",
+      
+        {
+          "initialOrientation": "PORTRAIT_UP"
+        }],
       "@react-native-firebase/crashlytics",
       [
         "expo-build-properties",
@@ -18,14 +27,14 @@
       
     ],
     "privacy": "unlisted",
-    "version": "1.1.8",
+    "version": "1.9.2",
     "orientation": "portrait",
     "icon": "./assets/flourishIcon.png",
     "userInterfaceStyle": "dark",
     "splash": {
       "image": "./assets/FlourishSplash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#000000"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
@@ -35,6 +44,8 @@
     ],
     "ios": {
       "bundleIdentifier": "com.flourish.theFlourishApplication",
+      "buildNumber":"1.6.1",
+      "requireFullScreen": true,
       "googleServicesFile": "./GoogleService-info.plist",
       "supportsTablet": true,
       "infoPlist": {
@@ -43,11 +54,16 @@
         ]
       }
     },
+    "androidStatusBar":{
+      "translucent":true
+  },
     "android": {
-      "googleServicesFile":"./google-services.json",
+      "versionCode":71,
+      "googleServicesFile": "./google-services.json",
+      "softwareKeyboardLayoutMode" : "resize",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/FlourishSplash.png",
-        "backgroundColor": "#FFFFFF"
+        "foregroundImage": "./assets/flourishIcon.png",
+        "backgroundColor": "#000000"
       },
       "package": "com.flourish.theFlourishApplication"
     },
@@ -59,6 +75,7 @@
         "projectId": "a7eb187b-35fa-4453-89fe-cec2601d10d4"
       }
     },
+  
     "owner": "ibiggy"
   }
 }

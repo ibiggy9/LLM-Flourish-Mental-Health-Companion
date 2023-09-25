@@ -3,7 +3,7 @@ import {View, Text, useWindowDimensions, Image, TouchableOpacity, ActivityIndica
 import tw from 'twrnc'
 import BackButton from './BackButton'
 import { AntDesign } from '@expo/vector-icons';
-import binuralBeats from '../assets/audio/binuralBeats.mp3'
+//import binuralBeats from '../assets/audio/binuralBeats.mp3'
 import { Audio } from 'expo-av';
 
 

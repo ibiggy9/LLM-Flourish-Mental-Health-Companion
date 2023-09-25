@@ -6,10 +6,17 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons'; 
 import BackButton from '../Components/BackButton';
+import { useAuth } from '../Context/AuthContext';
 
 
 export default function Staging({navigation, route}) {
+  
   const{items} = route.params
+  const {isFleur, setIsFleur} = useAuth()
+  useEffect(()=> {
+    setIsFleur(false)
+   }, [])
+
   
   useEffect(()=>{console.log(items)},[])
    /* Example Data Structure for this component:

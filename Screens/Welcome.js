@@ -10,7 +10,7 @@ export default function Welcome({navigation}) {
     const {width, height} = useWindowDimensions()
   return (
     <View style={[tw`bg-indigo-900`,{height:height, width:width}]}>
-        <ScrollView contentContainerStyle={tw`mt-15 mx-3 pb-40`} showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={tw`mt-15 mx-3 pb-50`} showsVerticalScrollIndicator={false}>
        
       <Text style={tw`text-white text-2xl font-bold text-center`}>Welcome To Flourish</Text>
       <Text style={tw`text-white text-lg mt-2`}>Here are a few details to get you started:</Text>

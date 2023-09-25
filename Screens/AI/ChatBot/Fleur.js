@@ -1,315 +1,149 @@
-import { View, Text, useWindowDimensions, Easing, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, KeyboardAvoidingView, Keyboard, AppState, Pressable} from 'react-native'
-import React, {useState, useRef} from 'react'
-import { LinearGradient } from 'expo-linear-gradient'
+import { View, Text, useWindowDimensions, Easing, TouchableOpacity, ScrollView, TextInput, FlatList, StatusBar, ActivityIndicator, Platform, KeyboardAvoidingView, Keyboard, AppState, Pressable, SafeAreaView} from 'react-native'
+import React, {useState, useRef, useEffect} from 'react'
 import tw from 'twrnc'
-import TextInputExercise from '../../../Components/ExerciseComponents/TextInputExercise'
-import { AnimatePresence, Motion } from '@legendapp/motion'
 import { MotiView, useDynamicAnimation, MotiText } from 'moti';
-import * as Haptics from 'expo-haptics';
 import { AntDesign } from '@expo/vector-icons';
-import { useEffect } from 'react'
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import { Ionicons } from '@expo/vector-icons';
 import { Feather } from '@expo/vector-icons';
 import { TypingAnimation } from 'react-native-typing-animation'
 import useRevHook from '../../../Components/useRevHook'
-import analytics from '@react-native-firebase/analytics';
-
+import { getAuth } from 'firebase/auth'
+import app from '../../../firebaseConfig'
+import { useFleur } from '../../../Context/FleurContext'
 
 export default function Fleur({navigation}) {
+    const {isProMember} = useRevHook()
     
-    const abortControllerRef = useRef(null)
-    const {width, height} = useWindowDimensions()
-    const [text, setText] = useState("")
-    const [loading, setLoading] = useState(false)
-    const [clicked, setClicked] = useState(false)
-    const [loadingMessage, setLoadingMessage] = useState(false)
-    const [fleurError, setFleurError] = useState(false)
-    const [userLeft, setUserLeft] = useState(false)
-    const scrollRef = useRef()
-    const {membershipLevel} = useRevHook()
-    const transcriptRef = useRef([
-      {role: "system", content:"You are a world class therapist named Fleur. Your job is to talk with your clients, understand their issues and help them with their issues whether that be anxiety, loss, depression, addition, lonliness and/or more.",},
-      {role: "assistant", content:"Hi I'm Fleur, your AI Therapist. Please ask me a question or for advice on something you're interesting in working on."},
-     ])
-    const [error, setError] = useState(false)
-    const [fleurResponse, setFleurResponse] = useState("")
-    const [wordCount, setWordCount] = useState(0)
-    const latest = useRef()
-    const [tokens, setTokens] = useState(0)
-    const [conversationString, setConversationString] = useState("")
     
-    //State with message component in it
-    const [messageList, setMessageList] = useState([
-        <Message type={'fleur'} content="Hi I'm Fleur, your AI Therapist. You can ask me a question, for advice, tell me about a difficult situation, and much more." />
-    ])
-
-   
-   
-
-   //Appstate, state.
-   const appState = useRef(AppState.currentState)
-   const [appStateVisible, setAppStateVisible] = useState(appState.current)
-   
-
-   //Function that dismisses the keyboard
-   function blur(){
-    Keyboard.dismiss()
-    setClicked(false)
-   }
-   
-   
-   //Background or foreground app state listener
-   useEffect(() => {
-    const subscription = AppState.addEventListener('change', nextAppState => {
-      if (
-        appState.current.match(/inactive|background/) && 
-        nextAppState === 'active'
-        
-      ) {
-        console.log('App has come to the foreground!');
-      } else{
-        console.log("App has gone to the background.")
-      }
-
-      appState.current = nextAppState;
-      setAppStateVisible(appState.current);
-      //console.log(appState.current)
+    const auth = getAuth(app)
       
-    });
-
-    return () => {
-      subscription.remove();
-    };
-  }, []);
-
-  useEffect(()=> {
-    console.log(AppState.currentState)
-    if(AppState.currentState != 'active' && loading == true){
+    const {
+      isFleur, 
+        setIsFleur, 
+        scrollToTop,
+        exercises,
+        chatMenuShow, 
+        setChatMenuShow,
+        fleurHelperRun, 
+        setFleurHelperRun,
+        textInputRef,
+        abortControllerRef, 
+        width,
+        height,
+        text,
+        setText,
+        loading, 
+        setLoading,
+        isFocused,
+        setIsFocused,
+        clicked, 
+        setClicked,
+        scrollRef, 
+        transcriptRef, 
+        error, 
+        setError, 
+        fleurResponse, 
+        setFleurResponse,
+        conversationString, 
+        setConversationString, 
+        helper, 
+        setHelper,
+        usageCount,
+        setUsageCount,
+        appStateVisible, 
+        setAppStateVisible,
+        appState,
+        AndroidKey,
+        initialSuggestions,
+        runFocus,
+        runBlur,
+        getUsageCount, 
+        saveUsageCount, 
+        clear, 
+        classifier,
+        fleurHelper,
+        fleurResponseFunc,
+        processFleurResponse,
+        addMessage,
+        scrollToBottom,
+        reTry,
+        cancelRun,
+        cancelFleurRequest,
+        userLeft, 
+        setUserLeft,
+        messageList,
+        setMessageList,
+        Message,
+        setKeyboardHeight,
+        keyboardHeight,
+        startSelection, 
+        setStartSelection,
+        approaches,
+        getChatData,
+        storeChatData
+    } = useFleur()
+    
+    useEffect(()=> {
+      scrollToTop()
+      getChatData()
       
-      
-      cancelRun()
+    }, [])
 
-    }
-  },[AppState.currentState])
    
-  //Function that clears conversation
-   function clear(){
-    setError()
-    setUserLeft(false)
-    console.log("Cleared!")
-    setMessageList([
-        <Message type={'fleur'} content="Hi I'm Fleur, your AI Therapist. You can ask me a question, for advice, tell me about a difficult situation, and much more." />
-    ])
-   
-    setConversationString("")
-    transcriptRef.current = [
-      {role: "system", content:"You are a world class therapist named Fleur. Your job is to provide therapeutic advice to your client who may be suffering from anxiety, loss, depression, addition, lonliness and/or more.",},
-      {role: "assistant", content:"Hi I'm Fleur, your AI Therapist. Please ask me a question or for advice on something you're interesting in working on."},
-     ]
-   }
-   
-  //This function calls the API
 
-
-  
-
-   async function fleurResponseFunc(latestInput){
-      console.log("Request to Fleur sent.")
-      abortControllerRef.current = new AbortController()
-
-      transcriptRef.current.push({role:"user", content:latestInput})
-      console.log(transcriptRef.current)
-      
-        setFleurResponse(false)
-        var myHeaders = new Headers();
-  
-        myHeaders.append("Authorization", "Bearer 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");
-        myHeaders.append("Content-Type", "application/json");
-
-        var raw = JSON.stringify({
-        "model": "gpt-3.5-turbo-0301",
-        
-        "messages": transcriptRef.current,
-
-        "presence_penalty": 1,
-        "frequency_penalty": 1,
-        "temperature": 0.2,
-        "max_tokens": 3500
-        });
-
-        
-        var requestOptions = {
-        method: 'POST',
-        headers: myHeaders,
-        body: raw,
-        redirect: 'follow',
-        signal: abortControllerRef.current.signal,
-        };
-
-        const response = await fetch("https://api.openai.com/v1/chat/completions", requestOptions)
-        const respJson = await response.json()
-        setTimeout(()=> !respJson ? cancelFleurRequest('timeout'): null, 7000)
-        
-        return respJson
-
-        fetch("https://api.openai.com/v1/chat/completions", requestOptions)
-            .then(response => response.json())
-            .then(result => appStateVisible == 'active' && fleurError != true ? processFleurResponse(result, latest) : null)
-            .catch(error => setFleurError(true) && console.log(error))  
-
-      
-    }
-
-    async function processFleurResponse(response){
-      console.log("Processing Fleur Response")
-      setError(false)
-      if(response){
-      console.log(response)
-        await analytics().logEvent('fleurResponse', {id:response})
-        const tokenUsage = response.usage.total_tokens
-        console.log(tokenUsage)
-        if(tokenUsage > 3800){
-          transcriptRef.current = transcriptRef.current.slice(0,10)
-        }
-
-        var resString = response.choices[0].message.content
-        var resStringNoSpace = resString.replace(/\r?\n|\r/, "")
-        setLoading(false)
-        var messageObj = {role:'assistant', content: resStringNoSpace}
-        var messageComponent = <Message type='fleur' content={resStringNoSpace} />
-        setMessageList((prev)=>[...prev, messageComponent])
-        transcriptRef.current.push(messageObj)
-        
-      } else {
-        console.log("Hi")
-      }
-        return 
-    }
-
-    //This runs  when the user enters a message
-     async function addMessage(type, input){
-
-        let tempText = text
-        await analytics().logEvent("fleurMessageSent", {
-          id:tempText
-        })
-        setText("")
-        setUserLeft(false)
-        //This switches on the typing animation
-        setLoading(true)
-        //This builds the message object for the model
-        var messageObj = {role:'user', content:input}
-        //create the message component
-        var newMessage = <Message type="user" content={tempText} />
-        
-
-        //add the message component to the list of messages to be displayed to the users. 
-        setMessageList((prev)=> [...prev, newMessage]) 
-        
-
-        //This calls the api
-        try{
-         let fleurResp = await fleurResponseFunc(tempText)
-          
-         let processed = await processFleurResponse(fleurResp)
-        } catch (error){
-          console.log(error.message)
-        }
-        
-        //This contains the conversation history. Important to note that ref is required to avoid rerender. 
-        //transcriptRef.current.push(messageObj)
-        //Clear the text box once a message is sent to Fleur. 
-        
-      }
-
-
-      function Message({type, content}){
-        if(type=="fleur"){
-            return(
-                <MotiView from={{translateY:500, opacity:0, scale:0.6}} animate={{translateY:0, opacity:1, scale:1}} transition={{type:'timing', duration:300}} id="text-Fleur" style={[tw`bg-slate-800 ml-2 justify-center mt-3 items-start rounded-2xl bg-opacity-60 p-2`, {maxWidth:width/1.5}]}>
-                  <Pressable
-                  
-                  
-                  >
-                <Text style={[tw`p-1 text-white `, {fontSize:17}]}>{content}
-                </Text>
-                </Pressable>
-                </MotiView>
-
-                )
-
-        } else {
-            return(
-                <MotiView from={{translateY:500}} animate={{translateY:0}} transition={{type:'timing', duration:200}} id="row" style={[{width:width}, tw`items-end`]}>
-                <View id="text-Fleur" style={[tw`bg-blue-700 mr-2 mt-1 justify-end items-start mt-3 rounded-2xl bg-opacity-60 p-2`, {maxWidth:width/1.5}]}>
-                    <Text style={[tw`p-1 text-white `, {fontSize:17}]}>{content}
-                </Text>
-                </View>
-                </MotiView>
-
-            )
-        }
-        
-      }
-
-      const scrollToBottom = () => {
-        scrollRef.current.scrollToEnd({ animated: true });
-      };
-
-
-      useEffect(()=> {scrollToBottom()}, [messageList, fleurResponse, addMessage])
-
-      //This reruns the message
-      function reTry(){
-        setError("Sorry, there was an error, retrying...")
-        fleurResponseFunc()
-
-      }
-
-      //This function cancels the run if a user leaves the app
-      function cancelRun(){
-        cancelFleurRequest()
-        const lastMessage = transcriptRef.current[transcriptRef.current.length -1]
-        setMessageList(messageList.slice(0, -1))
-        setText(lastMessage.content)
-        transcriptRef.current.pop()
-        setUserLeft(true)
-        setLoading(false)
-
-      }
-
-      //This function cancells the fetch request. 
-      function cancelFleurRequest(reasonCode){
-        setLoading(false)
-        reasonCode == "timeout" && setError("Either the network timed out or there was a server error. Retry sending")
-        abortControllerRef.current && abortControllerRef.current.abort()
-        console.log("Request to Fleur cancelled.")
-      }      
 
   return (
-    <View style={{width:width, height:height}}>
-    <LinearGradient 
     
-    colors={['#182E77','#EA1D3F']}
-    start={{x:0.05, y:0.6}}
-    end={{x:0.9, y:0.3}}
-    locations={[0.1,0.99]}
+    <>
+    {Platform.OS == "ios" &&
+    <View style={[tw` flex-1 ${Platform.OS=="android" ? `bg-black` : `bg-slate-900`}`, {height:height}]}>
+      
+      <SafeAreaView style={tw`h-full ${Platform.OS == "android" && ``} `}>
+      
+    <View style={tw`justify-start items-center`}>
+    {Platform.OS == 'android' ? <Text style={tw`text-orange-300 text-2xl text-center ${Platform.OS == "android" && ``}`}>Chat with Fleur</Text> : <Text style={tw`text-orange-300 text-2xl text-center `}>Chat with Fleur</Text>}
+    </View>
+
+    {!isProMember &&
+    <View style={tw``}>
+      <Text style={tw` text-white ml-5`}>{<> {usageCount} Messages Remaining on Free Tier</>}</Text>
+    </View>
+    }
+    {/*
+    {!isProMember && usageCount &&
+    <View style={tw`ml-1`}>
+      <Text style={tw`text-white ml-5 mb-1`}>{15-usageCount} Messages Remaining on Free Tier</Text>
+    </View>
+    }
+  */}
+    
+    <ScrollView
+          contentContainerStyle={tw`pb-100`}
+          extraScrollHeight={Platform.OS == 'ios' ? 50 :0} // use this prop for more fine tuning
+          
+    scrollToEnd={{animated:true}}
+    style={tw` `}
+    
+    onContentSizeChange={() => messageList.length !== 1 ? scrollRef.current.scrollToEnd({ animated: true }) : null}
+    //onLayout={() => scrollRef.current.scrollToEnd({ animated: true })}
+    scrollEventThrottle={16}
+    ref={scrollRef} 
+    keyboardShouldPersistTaps='handled'
+      
+     >
     
     
-    style={{width:width, height:height, opacity:0.65}}
-    >
-    </LinearGradient>   
-    <View style={[tw`flex-1 justify-start mt-10`,{height:height/1.18, width:width, opacity:1, position:'absolute'}]}>
+   
     
-    <Text style={tw`text-white text-2xl text-center mt-5`}>Chat with Fleur</Text>
-    <ScrollView ref={scrollRef} onContentSizeChange={()=> scrollToBottom()} contentContainerStyle={[tw` pb-10 `,]}>
     
+
     
     {messageList}
+    
     {userLeft &&
     <View style={tw`mr-30 px-5 py-3`} onPress={()=> clear()}>
-    <Text style={tw`text-white`}>Please don't leave the app while Fleur is responding. Send your message again.</Text>
+      
+    <Text style={tw`text-white`}>Please don't leave the app while Fleur is responding. Please send your message again.</Text>
     </View>
   
     }
@@ -334,61 +168,817 @@ export default function Fleur({navigation}) {
       </View>
     }
     {messageList.length > 1 && !loading && 
-    <TouchableOpacity style={tw`mr-30 px-5 py-2 mb-15`} onPress={()=> clear()}>
+    <TouchableOpacity style={tw`mr-30 ml-4 py-1 mb-5`} onPress={()=> clear()}>
     <Text style={tw`text-white `}>Close this conversation</Text>
     </TouchableOpacity>
     }
-    </ScrollView>
-    
 
 
-    <KeyboardAvoidingView
-    behavior='padding'
-    style={tw` `}
-    keyboardVerticalOffset={40}
-    
-    > 
-         
-
-    <View style={tw`justify-start items-center`} id="text-input-container">
-    {clicked ? 
-    <TouchableOpacity style={{position:'absolute', bottom:12, left:10, right:10}}  onPress={()=> addMessage("user", text)}>
-    <View  style={[{}, tw`bg-slate-700 flex-row items-center bg-opacity-90 rounded-2xl`]} >
+{messageList.length === 1 && !loading && chatMenuShow == false &&
+      <>
+      
+      <Text style={[tw`ml-4 mb-1 text-white font-bold mt-3`,{fontSize:15}]}>Some things you can try {startSelection != null && "(Tap to send)"}</Text> 
+      {startSelection == null &&
+      <MotiView from={{scale:0, opacity:0}} animate={{scale:1, opacity:1}} transition={{type:'timing', duration:300}}>
+      <View style={tw`flex-col  ml-4`}>
+      <TouchableOpacity onPress={()=> setStartSelection("exercises")} style={[tw`border border-white rounded-2xl justify-center items-center my-2`, {width:width/1.75, height:height/15}]}>
+        <Text style={tw`text-white text-lg`}>Therapy Exercises</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={()=> setStartSelection("scenarios")} style={[tw`border border-white rounded-2xl justify-center items-center my-2`, {width:width/1.75, height:height/15}]}>
+        <Text style={tw`text-white text-lg`}>Common Challenges</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={()=> setStartSelection("approaches")} style={[tw`border border-white rounded-2xl justify-center items-center my-2`, {width:width/1.75, height:height/15}]}>
+        <Text style={tw`text-white text-lg`}>Therapeutic Approaches</Text>
+      </TouchableOpacity>
+      </View>
+      </MotiView>
+      }
+      
+      {startSelection == "scenarios" &&
+      <>
+      <MotiView from={{scale:0.5, opacity:0}} animate={{scale:1, opacity:1}} transition={{type:'timing', duration:600}}>
+      <FlatList 
+        data={initialSuggestions}
+        //contentContainerStyle={tw`pb-80`}
+        showsHorizontalScrollIndicator={false}
+        pagingEnabled 
+        horizontal
+        keyboardShouldPersistTaps='handled'
+        snapToEnd
+        snapToStart
+        snapToInterval={width/1.25}
         
-        <TextInput
-        style={[tw`ml-3 text-white text-lg py-3`, { width:width/1.3}]}
-        placeholder={"Enter Message..."}
-        placeholderTextColor={'gray'}
-        multiline={true}
-        numberOfLines={4}
-        value={text}
-        autoFocus
-        onChangeText={setText}
-        onFocus={()=> scrollToBottom()}
-        onBlur={()=> blur()}
-        />
-        <View style={tw`flex-col justify-center ml-3`}>
-        <Feather name="send" style={tw`mr-3  mt-2 text-slate-200`} size={30} color="white" />
-        </View>
-    </View>
-   
+        decelerationRate='fast'
         
-    </TouchableOpacity>
+        renderItem={(itemData)=> {
+            
+            return(
+              <>
+             
+             <View style={[{width:width/1.25}, tw`mt-1`]}>
+              
+              <TouchableOpacity onPress={()=> {
+                setText(itemData.item.suggestion)
+                setClicked(true)
+                setChatMenuShow(false)
+                //addMessage("user", text)
+                }} style={[tw`ml-2  rounded-2xl p-2 `, ]}>
+              <Text style={tw`text-white  font-bold`}>{itemData.item.title}</Text>
+              <Text style={[tw`text-white `,{fontSize:16}]}>{itemData.item.suggestion}</Text>
+              </TouchableOpacity>
+            </View>
+             
+             
+  
+              
+              </>
+            )
+          
+        }}
+      
+      />
+      
+      <TouchableOpacity style={tw`ml-4 mt-3  mx-10 items-center`} onPress={()=> setStartSelection(null)}>
+        <Text style={tw`text-white font-extrabold text-lg`}>Go Back</Text>
+      </TouchableOpacity>
+        </MotiView>
+      </>
+        }
+
+      {startSelection == "exercises" &&
+      <>
+      <MotiView from={{scale:0.5, opacity:0}} animate={{scale:1, opacity:1}} transition={{type:'timing', duration:600}}>
+      <FlatList 
+        data={exercises}
+        //contentContainerStyle={tw`pb-80`}
+        showsHorizontalScrollIndicator={false}
+        pagingEnabled 
+        horizontal
+        keyboardShouldPersistTaps='handled'
+        snapToEnd
+        snapToStart
+        snapToInterval={width/1.25}
+        
+        decelerationRate='fast'
+        
+        renderItem={(itemData)=> {
+            
+            return(
+              <>
+             
+             <View style={[{width:width/1.25}, tw`mt-1`]}>
+              
+              <TouchableOpacity onPress={()=> {
+                setText(itemData.item.message)
+                setClicked(true)
+                setChatMenuShow(false)
+                //addMessage("user", text)
+                }} style={[tw`ml-2  rounded-2xl p-2 `, ]}>
+              <Text style={tw`text-white  font-bold`}>{itemData.index+1}. {itemData.item.title}</Text>
+              <Text style={[tw`text-white `,{fontSize:16}]}>{itemData.item.description}</Text>
+              </TouchableOpacity>
+            </View>
+             
+             
+  
+              
+              </>
+            )
+          
+        }}
+      
+      />
+      
+      <TouchableOpacity style={tw`ml-4 mt-3  mx-10 items-center`} onPress={()=> setStartSelection(null)}>
+        <Text style={tw`text-white font-extrabold text-lg`}>Go Back</Text>
+      </TouchableOpacity>
+        </MotiView>
+      </>
+        }
+
+
+    {startSelection == "approaches" &&
+      <>
+      <MotiView from={{scale:0.5, opacity:0}} animate={{scale:1, opacity:1}} transition={{type:'timing', duration:600}}>
+      <FlatList 
+        data={approaches}
+        //contentContainerStyle={tw`pb-80`}
+        showsHorizontalScrollIndicator={false}
+        pagingEnabled 
+        horizontal
+        keyboardShouldPersistTaps='handled'
+        snapToEnd
+        snapToStart
+        snapToInterval={width/1.25}
+        
+        decelerationRate='fast'
+        
+        renderItem={(itemData)=> {
+            
+            return(
+              <>
+             
+             <View style={[{width:width/1.25}, tw`mt-1`]}>
+              
+              <TouchableOpacity onPress={()=> {
+                setText(itemData.item.message)
+                setClicked(true)
+                setChatMenuShow(false)
+                //addMessage("user", text)
+                }} style={[tw`ml-2  rounded-2xl p-2 `, ]}>
+              <Text style={tw`text-white  font-bold`}>{itemData.index+1}. {itemData.item.title}</Text>
+              <Text style={[tw`text-white `,{fontSize:16}]}>{itemData.item.description}</Text>
+              </TouchableOpacity>
+            </View>
+             
+             
+  
+              
+              </>
+            )
+          
+        }}
+      
+      />
+      
+      <TouchableOpacity style={tw`ml-4 mt-3  mx-10 items-center`} onPress={()=> setStartSelection(null)}>
+        <Text style={tw`text-white font-extrabold text-lg`}>Go Back</Text>
+      </TouchableOpacity>
+        </MotiView>
+      </>
+        }
+      
+
+
+
+      </>
+      
+      }
+
+
+    {helper ? 
+    <>
+    {helper.length > 1 ?
+    <>
+    {helper ? <Text style={[tw`ml-4 mb-1 text-white font-bold`,{fontSize:15}]}>Suggested Reponses (Tap to send)</Text> : <> <ActivityIndicator size='large' /> </>}
+    <FlatList 
+      data={helper ? helper : null}
+      //contentContainerStyle={tw`pb-80`}
+      showsHorizontalScrollIndicator={false}
+      pagingEnabled 
+      horizontal
+      keyboardShouldPersistTaps='handled'
+      snapToEnd
+      snapToStart
+      snapToInterval={width/1.25}
+      
+      decelerationRate='fast'
+      
+      renderItem={(itemData)=> {
+          
+          return(
+            <>
+           {itemData.item.q.includes('Thank you') || itemData.item.q.includes(':') || itemData.item.q == "." ?
+           null 
+           :
+           <View style={[{width:width/1.25}, tw`mt-1`]}>
+            
+            <TouchableOpacity onPress={()=> {
+              setText(itemData.item.q)
+              setClicked(true)
+              //addMessage("user", text)
+              }} style={[tw`ml-2  rounded-2xl p-2 `, ]}>
+            <Text style={[tw`text-white `,{fontSize:16}]}>{itemData.item.q}</Text>
+            </TouchableOpacity>
+          </View>
+           
+           }
+
+            
+            </>
+          )
+        
+      }}
+    
+    />
+    </>
+
     :
-    <TouchableOpacity style={tw` mb-3`} onPress={()=> setClicked(true)}>
-    <MotiView from={{scale:0.2}} animate={{scale:1}} transition={{type:'timing'}}>
-    <Ionicons name="add-circle" size={50} color="white" />
-    </MotiView>
-    </TouchableOpacity>
+    <>
+    {helper ? <Text style={[tw`ml-4 mb-1 text-white font-bold`,{fontSize:15}]}>Suggested Reponses (Tap to send)</Text> : <> <ActivityIndicator size='large' /> </>}
+    <FlatList 
+    data={helper ? helper : null}
+    horizontal
+    showsHorizontalScrollIndicator={false}
+    pagingEnabled
+    keyboardShouldPersistTaps='handled'
+    snapToEnd
+    //contentContainerStyle={tw`pb-80`}
+    snapToStart
+    snapToInterval={width}
+    
+    decelerationRate='fast'
+    
+    renderItem={(itemData)=> {
+        
+        return(
+          <>
+         
+          <View style={[{width:width/1.25}, tw`mt-1`]}>
+            
+          <TouchableOpacity onPress={()=> {
+            setText(itemData.item.q)
+            setClicked(true)
+            //addMessage("user", text)
+            }} style={tw`ml-2  rounded-2xl  p-2`}>
+          <Text style={[tw`text-white `,{fontSize:16}]}>{itemData.item.q}</Text>
+          </TouchableOpacity>
+        </View>
+
+       
+         
+          
+          </>
+        )
+      
+    }}
+  
+  />
+</>
 
     }
-
+    </>
+    :
+    <View>
+      {fleurHelperRun == true &&
+    <ActivityIndicator size='large' color='white' />
+      }
     </View>
-    </KeyboardAvoidingView>
-   
+    }
+    </ScrollView>
+ 
+ 
+    
+    
 
+         {/*
+         
+         {clicked && r
+         <View style={tw`justify-start items-end mb-20 mr-5`}>
+         <AntDesign name="questioncircle" size={40} color="black" /> 
+         </View>
+         }
+        */}
+ 
+
+{Platform.OS == 'ios' &&
+  <KeyboardAvoidingView behavior='padding' keyboardVerticalOffset={0} style={[tw`flex-row items-center absolute bottom-0`, {width:width}]}>
+  {chatMenuShow == false &&
+ 
+   <View id='outer-container' style={[{width:width, maxHeight:height/2}, tw`bg-slate-700 flex-row  bg-opacity-90   ${!isFocused ? `min-h-20`: `min-h-14`}`]} >
+       
+       <View id="inner-container" style={[tw`flex-row justify-start items-start rounded-2xl `, {width:width}]}>
+        <View style={tw`flex-row items-center mt-2`}>
+       <TouchableOpacity style={tw`ml-2`} onPress={()=> setChatMenuShow(true)}>
+       <AntDesign name="minuscircleo" size={28} color="white" />
+       </TouchableOpacity>
+
+       <TextInput
+       multiline
+       autoFocus={Platform.OS == 'ios' ? true : false}
+       numberOfLines={1}
+       style={[tw`ml-2 mr-1 p-2 ${!isFocused && text.length > 20 && `mb-5`} text-white text-lg bg-black rounded-2xl`, { width:width/1.3, minHeight:40}]}
+       placeholder={loading ? "Fleur is responding..." : "Enter Message..."}
+       ref={textInputRef}
+       placeholderTextColor={'gray'}
+       value={text}
+       maxLength={750}
+       onBlur={()=> setIsFocused(false)}
+       onChangeText={setText}
+       onFocus={()=> scrollToBottom()}
+       />
+       
+       
+       <TouchableOpacity style={tw`flex-col `} onPress={()=> loading ? null : addMessage("user", text, navigation)}>
+         {text.length > 650 ? <MotiText from={{scale:0}} animate={{scale:1}} transition={{type:'timing', duration:400}} style={tw`font-light  text-slate-200`}>{text.length > 650 && text.length -750}</MotiText> : null}
+       <Feather name="send" style={tw` ml-2`} size={28} color="orange"  />
+       </TouchableOpacity>
+       </View>
+       </View>
+   </View>     
+   
+   }
+
+   {chatMenuShow == true &&
+   <TouchableOpacity  style={tw`flex-1 items-center justify-center mb-30 `} onPress={()=> {
+     
+     //setClicked(true)
+     setChatMenuShow(false)
+     
+     }}>
+   <MotiView from={{scale:0.2}} animate={{scale:1}} transition={{type:'timing'}}>
+   <Ionicons name="add-circle" size={45} color="white" />
+   
+   </MotiView>
+   </TouchableOpacity>
+   }
+   
+     </KeyboardAvoidingView>
+  }
+       </SafeAreaView>
     </View>
     
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    {Platform.OS == 'android' &&
+        <View style={[tw` h-full bg-slate-900`]}>
+        
+        
+      <View style={tw`justify-start items-center mt-11`}>
+      {Platform.OS == 'android' ? <Text style={tw`text-orange-300 text-2xl text-center ${Platform.OS == "android" && ``}`}>Chat with Fleur</Text> : <Text style={tw`text-orange-300 text-2xl text-center `}>Chat with Fleur</Text>}
+      
+      
+      </View>
+      {/*
+      {!isProMember && usageCount &&
+      <View style={tw`ml-1`}>
+        <Text style={tw`text-white ml-5 mb-1`}>{15-usageCount} Messages Remaining on Free Tier</Text>
+      </View>
+      }
+    */}
+      
+      <ScrollView
+            contentContainerStyle={tw`pb-100`}
+            
+            
+      scrollToEnd={{animated:true}}
+      style={tw` `}
+      
+      onContentSizeChange={() => scrollRef.current.scrollToEnd({ animated: true })}
+      //onLayout={() => scrollRef.current.scrollToEnd({ animated: true })}
+      scrollEventThrottle={16}
+      ref={scrollRef} 
+      //keyboardShouldPersistTaps='handled'
+        
+       >
+      
+      
+     
+      
+      
+  
+      
+      {messageList}
+      
+      {userLeft &&
+      <View style={tw`mr-30 px-5 py-3`} onPress={()=> clear()}>
+        
+      <Text style={tw`text-white`}>Please don't leave the app while Fleur is responding. Please send your message again.</Text>
+      </View>
+    
+      }
+      {loading &&
+      <View style={tw`ml-10 mt-10 mb-20`}>
+      
+      <TypingAnimation 
+          dotStyles={tw`mb-3`}
+          dotColor="silver"
+          dotMargin={15}
+          dotSpeed={0.20}
+          dotRadius={5}
+          dotX={20}
+          
+        />
+        
+        </View>
+      }
+      {error &&
+        <View style={tw`mr-30 px-5 py-3 mb-2 `} onPress={()=> clear()}>
+        <Text style={tw`text-white`}>{error}</Text>
+        </View>
+      }
+      {messageList.length > 1 && !loading && 
+      <TouchableOpacity style={tw`mr-30 ml-4 py-1 mb-5`} onPress={()=> clear()}>
+      <Text style={tw`text-white `}>Close this conversation</Text>
+      </TouchableOpacity>
+      }
+
+{messageList.length === 1 && !loading && chatMenuShow == false &&
+      <>
+      
+      <Text style={[tw`ml-4 mb-1 text-white font-bold mt-3`,{fontSize:15}]}>Some things you can try {startSelection != null && "(Tap to send)"}</Text> 
+      {startSelection == null &&
+      <MotiView from={{scale:0, opacity:0}} animate={{scale:1, opacity:1}} transition={{type:'timing', duration:300}}>
+      <View style={tw`flex-col  ml-4`}>
+      <TouchableOpacity onPress={()=> setStartSelection("exercises")} style={[tw`border border-white rounded-2xl justify-center items-center my-2`, {width:width/1.75, height:height/15}]}>
+        <Text style={tw`text-white text-lg`}>Therapy Exercises</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={()=> setStartSelection("scenarios")} style={[tw`border border-white rounded-2xl justify-center items-center my-2`, {width:width/1.75, height:height/15}]}>
+        <Text style={tw`text-white text-lg`}>Common Challenges</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={()=> setStartSelection("approaches")} style={[tw`border border-white rounded-2xl justify-center items-center my-2`, {width:width/1.75, height:height/15}]}>
+        <Text style={tw`text-white text-lg`}>Therapeutic Approaches</Text>
+      </TouchableOpacity>
+      </View>
+      </MotiView>
+      }
+      
+      {startSelection == "scenarios" &&
+      <>
+      <MotiView from={{scale:0.5, opacity:0}} animate={{scale:1, opacity:1}} transition={{type:'timing', duration:600}}>
+      <FlatList 
+        data={initialSuggestions}
+        //contentContainerStyle={tw`pb-80`}
+        showsHorizontalScrollIndicator={false}
+        pagingEnabled 
+        horizontal
+        keyboardShouldPersistTaps='handled'
+        snapToEnd
+        snapToStart
+        snapToInterval={width/1.25}
+        
+        decelerationRate='fast'
+        
+        renderItem={(itemData)=> {
+            
+            return(
+              <>
+             
+             <View style={[{width:width/1.25}, tw`mt-1`]}>
+              
+              <TouchableOpacity onPress={()=> {
+                setText(itemData.item.suggestion)
+                setClicked(true)
+                setChatMenuShow(false)
+                //addMessage("user", text)
+                }} style={[tw`ml-2  rounded-2xl p-2 `, ]}>
+              <Text style={tw`text-white  font-bold`}>{itemData.item.title}</Text>
+              <Text style={[tw`text-white `,{fontSize:16}]}>{itemData.item.suggestion}</Text>
+              </TouchableOpacity>
+            </View>
+             
+             
+  
+              
+              </>
+            )
+          
+        }}
+      
+      />
+      
+      <TouchableOpacity style={tw`ml-4 mt-3  mx-10 items-center`} onPress={()=> setStartSelection(null)}>
+        <Text style={tw`text-white font-extrabold text-lg`}>Go Back</Text>
+      </TouchableOpacity>
+        </MotiView>
+      </>
+        }
+
+      {startSelection == "exercises" &&
+      <>
+      <MotiView from={{scale:0.5, opacity:0}} animate={{scale:1, opacity:1}} transition={{type:'timing', duration:600}}>
+      <FlatList 
+        data={exercises}
+        //contentContainerStyle={tw`pb-80`}
+        showsHorizontalScrollIndicator={false}
+        pagingEnabled 
+        horizontal
+        keyboardShouldPersistTaps='handled'
+        snapToEnd
+        snapToStart
+        snapToInterval={width/1.25}
+        
+        decelerationRate='fast'
+        
+        renderItem={(itemData)=> {
+            
+            return(
+              <>
+             
+             <View style={[{width:width/1.25}, tw`mt-1`]}>
+              
+              <TouchableOpacity onPress={()=> {
+                setText(itemData.item.message)
+                setClicked(true)
+                setChatMenuShow(false)
+                //addMessage("user", text)
+                }} style={[tw`ml-2  rounded-2xl p-2 `, ]}>
+              <Text style={tw`text-white  font-bold`}>{itemData.index+1}. {itemData.item.title}</Text>
+              <Text style={[tw`text-white `,{fontSize:16}]}>{itemData.item.description}</Text>
+              </TouchableOpacity>
+            </View>
+             
+             
+  
+              
+              </>
+            )
+          
+        }}
+      
+      />
+      
+      <TouchableOpacity style={tw`ml-4 mt-3  mx-10 items-center`} onPress={()=> setStartSelection(null)}>
+        <Text style={tw`text-white font-extrabold text-lg`}>Go Back</Text>
+      </TouchableOpacity>
+        </MotiView>
+      </>
+        }
+
+
+    {startSelection == "approaches" &&
+      <>
+      <MotiView from={{scale:0.5, opacity:0}} animate={{scale:1, opacity:1}} transition={{type:'timing', duration:600}}>
+      <FlatList 
+        data={approaches}
+        //contentContainerStyle={tw`pb-80`}
+        showsHorizontalScrollIndicator={false}
+        pagingEnabled 
+        horizontal
+        keyboardShouldPersistTaps='handled'
+        snapToEnd
+        snapToStart
+        snapToInterval={width/1.25}
+        
+        decelerationRate='fast'
+        
+        renderItem={(itemData)=> {
+            
+            return(
+              <>
+             
+             <View style={[{width:width/1.25}, tw`mt-1`]}>
+              
+              <TouchableOpacity onPress={()=> {
+                setText(itemData.item.message)
+                setClicked(true)
+                setChatMenuShow(false)
+                //addMessage("user", text)
+                }} style={[tw`ml-2  rounded-2xl p-2 `, ]}>
+              <Text style={tw`text-white  font-bold`}>{itemData.index+1}. {itemData.item.title}</Text>
+              <Text style={[tw`text-white `,{fontSize:16}]}>{itemData.item.description}</Text>
+              </TouchableOpacity>
+            </View>
+             
+             
+  
+              
+              </>
+            )
+          
+        }}
+      
+      />
+      
+      <TouchableOpacity style={tw`ml-4 mt-3  mx-10 items-center`} onPress={()=> setStartSelection(null)}>
+        <Text style={tw`text-white font-extrabold text-lg`}>Go Back</Text>
+      </TouchableOpacity>
+        </MotiView>
+      </>
+        }
+      
+
+
+
+      </>
+      
+      }
+
+
+      {helper ? 
+      <>
+      {helper.length > 1 ?
+      <>
+      {helper ? <Text style={[tw`ml-4 mb-1 text-white font-bold`,{fontSize:15}]}>Suggested Reponses (Tap to send)</Text> : <> <ActivityIndicator size='large' /> </>}
+      <FlatList 
+        data={helper ? helper : null}
+        //contentContainerStyle={tw`pb-80`}
+        showsHorizontalScrollIndicator={false}
+        pagingEnabled 
+        horizontal
+        keyboardShouldPersistTaps='handled'
+        snapToEnd
+        snapToStart
+        snapToInterval={width/1.25}
+        
+        decelerationRate='fast'
+        
+        renderItem={(itemData)=> {
+            
+            return(
+              <>
+             {itemData.item.q.includes('Thank you') || itemData.item.q.includes(':') || itemData.item.q == "." ?
+             null 
+             :
+             <View style={[{width:width/1.25}, tw`mt-1`]}>
+              
+              <TouchableOpacity onPress={()=> {
+                setText(itemData.item.q)
+                setClicked(true)
+                //addMessage("user", text)
+                }} style={[tw`ml-2  rounded-2xl p-2 `, ]}>
+              <Text style={[tw`text-white `,{fontSize:16}]}>{itemData.item.q}</Text>
+              </TouchableOpacity>
+            </View>
+             
+             }
+  
+              
+              </>
+            )
+          
+        }}
+      
+      />
+      </>
+  
+      :
+      <>
+      {helper ? <Text style={[tw`ml-4 mb-1 text-white font-bold`,{fontSize:15}]}>Suggested Reponses (Tap to send)</Text> : <> <ActivityIndicator size='large' /> </>}
+      <FlatList 
+      data={helper ? helper : null}
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      pagingEnabled
+      keyboardShouldPersistTaps='handled'
+      snapToEnd
+      //contentContainerStyle={tw`pb-80`}
+      snapToStart
+      snapToInterval={width}
+      
+      decelerationRate='fast'
+      
+      renderItem={(itemData)=> {
+          
+          return(
+            <>
+           
+            <View style={[{width:width/1.25}, tw`mt-1`]}>
+              
+            <TouchableOpacity onPress={()=> {
+              setText(itemData.item.q)
+              setClicked(true)
+              //addMessage("user", text)
+              }} style={tw`ml-2  rounded-2xl  p-2`}>
+            <Text style={[tw`text-white `,{fontSize:16}]}>{itemData.item.q}</Text>
+            </TouchableOpacity>
+          </View>
+  
+         
+           
+            
+            </>
+          )
+        
+      }}
+    
+    />
+  </>
+  
+      }
+      </>
+      :
+      <View>
+        {fleurHelperRun == true &&
+      <ActivityIndicator size='large' color='white' />
+        }
+      </View>
+      }
+      </ScrollView>
+   
+   
+      
+      
+  
+           {/*
+           
+           {clicked && 
+           <View style={tw`justify-start items-end mb-20 mr-5`}>
+           <AntDesign name="questioncircle" size={40} color="black" /> 
+           </View>
+           }
+          */}
+    {Platform.OS == 'android' && 
+   <View  style={[tw` flex-row justify-center `, {width:width}]}>
+    
+     {chatMenuShow == false &&
+     <MotiView
+      state={AndroidKey}
+      
+    >
+    <View style={tw`flex-row items-center bg-slate-700 bg-opacity-90 min-h-14`}>
+    <View id="inner-container" style={[tw` flex-row justify-start items-start rounded-2xl `, {width:width}]}>
+     <View style={tw`flex-row items-center mt-1`}>
+    <TouchableOpacity style={tw`ml-2`} onPress={()=> setChatMenuShow(true)}>
+    <AntDesign name="minuscircleo" size={28} color="white" />
+    </TouchableOpacity>
+
+    
+    <TextInput
+    multiline
+    autoFocus={true}
+    numberOfLines={1}
+    style={[tw`ml-2 mr-1 p-2 ${!isFocused && text.length > 20 && `mb-5`} text-white text-lg bg-black rounded-2xl`, { width:width/1.3, minHeight:40}]}
+    placeholder={loading ? "Fleur is responding..." : "Enter Message..."}
+    ref={textInputRef}
+    placeholderTextColor={'gray'}
+    value={text}
+    maxLength={750}
+    
+    onChangeText={setText}
+    
+    />
+    
+    
+    <TouchableOpacity style={tw`flex-col `} onPress={()=> loading ? null : addMessage("user", text)}>
+      {text.length > 650 ? <MotiText from={{scale:0}} animate={{scale:1}} transition={{type:'timing', duration:400}} style={tw`font-light  text-slate-200`}>{text.length > 650 && text.length -750}</MotiText> : null}
+    <Feather name="send" style={tw` ml-2`} size={28} color="orange"  />
+    </TouchableOpacity>
     </View>
+    </View>
+    </View>
+  </MotiView>     
+  
+  }
+  
+  {chatMenuShow == true &&
+  <TouchableOpacity  style={tw`   mb-30`} onPress={()=> {
+  
+  //setClicked(true)
+  setChatMenuShow(false)
+  
+  }}>
+  <MotiView from={{scale:0.2}} animate={{scale:1}} transition={{type:'timing'}}>
+  <Ionicons name="add-circle" size={45} color="white" />
+  
+  </MotiView>
+  </TouchableOpacity>
+  }
+      
+      </View>
+  }       
+      </View>
+
+    }
+    </>
   )
 }

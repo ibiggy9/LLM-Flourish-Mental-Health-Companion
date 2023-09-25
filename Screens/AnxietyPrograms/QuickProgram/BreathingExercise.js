@@ -11,6 +11,7 @@ import BackButton from '../../../Components/BackButton'
 import { LinearGradient } from 'expo-linear-gradient'
 import InstructionSlider from '../../../Components/ExerciseComponents/InstructionSlider'
 import analytics from '@react-native-firebase/analytics';
+import MarginWrapper from '../../MarginWrapper'
 
 export default function BreathingExercise({navigation}) {
   const [step, setStep] = useState(0)
@@ -179,7 +180,8 @@ export default function BreathingExercise({navigation}) {
 
  
 
-  function next(){
+  async function next(){
+    await analytics().logEvent(`ExhalebreathCount_${breathCount}`)
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
     setStep(step+1)
   }
@@ -192,18 +194,20 @@ export default function BreathingExercise({navigation}) {
   }
 
   return (
-    <View style={{width:width, height:height}}>
-    <LinearGradient 
-    
-    colors={['#27178C','#8C4917']}
-    start={{x:0.05, y:0.6}}
-    end={{x:0.9, y:0.3}}
-    locations={[0.1,0.99]}
-    
-    
-    style={{width:width, height:height, opacity:0.65}}
-    >
-    </LinearGradient>
+    <View style={[tw`flex-1 ${Platform.OS=="android" && `bg-black`}`,{width:width, height:height}]}>
+      <MarginWrapper>
+    {Platform.OS != 'android' &&
+  <LinearGradient 
+  
+  colors={['#182E77','#EA1D3F']}
+  start={{x:0.05, y:0.6}}
+  end={{x:0.9, y:0.3}}
+  locations={[0.1,0.99]}
+  
+  
+  style={{width:width, height:height, opacity:0.65}}
+  />
+  }
     <View style={[tw`flex-1 justify-start  pb-40`,{height:height, width:width, opacity:1, position:'absolute'}]}>
     <AnimatePresence exitBeforeEnter>
       
@@ -349,6 +353,7 @@ export default function BreathingExercise({navigation}) {
         }
     </AnimatePresence>
    </View>
+   </MarginWrapper>
    </View>
   )
 }

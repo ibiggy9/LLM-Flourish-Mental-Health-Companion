@@ -8,18 +8,26 @@
       "distribution": "internal",
       "ios": {
         "resourceClass": "m1-medium"
-      
+        
       }
     },
     "preview": {
       "distribution": "internal",
       "ios": {
-        "resourceClass": "m1-medium"
+        "resourceClass": "m1-medium",
+        
       }
     },
     "production": {
       "ios": {
         "resourceClass": "m1-medium"
+        
+
+      },
+      "distribution": "store",
+      "android": {
+        "credentialsSource": "local",
+        "releaseChannel": "default"
       }
     }
   },

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import {View, Text, FlatList, StyleSheet, TouchableOpacity, Button, useWindowDimensions, ScrollView, Image, Touchable } from 'react-native'
+import {View, Text, FlatList, StyleSheet, TouchableOpacity, Button, useWindowDimensions, ScrollView, Image, Touchable, Platform } from 'react-native'
 import { FontAwesome5 } from '@expo/vector-icons'; 
 import { AntDesign } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -16,19 +16,16 @@ import analytics from '@react-native-firebase/analytics';
 import { useAuth } from '../Context/AuthContext';
 
 export default function ExploreNew({navigation, route}) {
-    
+    const {isFleur, setIsFleur} = useAuth()
     const {firstLogin} = useAuth()
     const {width, height} = useWindowDimensions()
     const db = getDatabase()
     const auth = getAuth(app)
     const {isProMember} = useRevHook()
 
-    useEffect(()=> {
-        if(firstLogin){
-            navigation.navigate('Welcome')
-        }
-    },[])
-   
+   useEffect(()=> {
+    setIsFleur(false)
+   }, [])
 
     const nat = [
         {point:"I'm such a failure"},
@@ -71,6 +68,7 @@ export default function ExploreNew({navigation, route}) {
     const gettingStarted = [
         {
             title: "Reduce Stress and Boost Your Mood: Grounding", 
+            eventName:"article_Grounding",
             descriptionShort:"Discover the benefits of grounding for mental health: Techniques to bring focus to the present moment.", 
             content: 
             <View>
@@ -124,6 +122,7 @@ export default function ExploreNew({navigation, route}) {
         },
         {
             title: "CBT's 5 Part Model: The Ultimate Mental Health Toolkit You Need to Know", 
+            eventName:"article_CBT",
             descriptionShort:"Learn how Cognitive Behavioral Therapy can help rewire our thinking patterns.", 
             content:
             <View>
@@ -179,6 +178,7 @@ export default function ExploreNew({navigation, route}) {
         },
         {
             title: "Negative Automatic Thoughts: A Hidden Culprit Behind Anxiety and Depression", 
+            eventName:"article_NAT",
             descriptionShort:"Learn how depression and anxiety can be understood via looping automatic thoughts and what you can do about it.", 
             content: 
             <View>
@@ -227,6 +227,7 @@ export default function ExploreNew({navigation, route}) {
         },
         {
             title: "Learn How Behavioral Activation Can Help You Overcome Depression and Anxiety", 
+            eventName:"article_BA",
             descriptionShort:"Boost your mood with behavioural activation: A psychological approach to overcoming anxiety and depression.", 
             content:
             <View>
@@ -276,6 +277,7 @@ export default function ExploreNew({navigation, route}) {
     const psychoeducation = [
         {
             title:"Visioning: The Psychological Technique That Can Change Your Life",
+            eventName:"article_Visioning",
             descriptionShort:"You can't get where you want to go if you don't first aim at it. Worthwhile goals take visioning, planning and goal setting. Learn more here. ",
             content:
             <View>
@@ -335,6 +337,7 @@ In conclusion, a compelling vision is a powerful tool for setting and achieving 
         },
         {
             title:"Guide to DBT: A Science-Backed Approach to Improved Mental Health",
+            eventName:"article_DBT",
             descriptionShort:"Regain control of emotions: An introduction to dialectical behaviour therapy (DBT).",
             content:
             <View>
@@ -411,6 +414,7 @@ In conclusion, DBT is a highly effective form of psychotherapy that has been sho
         },
         {
             title:"How The Brain Works: Focus",
+            eventName:"article_Focus",
             descriptionShort:"Learn how the brain identifies tasks, ignores distraction and accelerates productivity with it's built in focus circuits.",
             content:
             <View>
@@ -472,6 +476,7 @@ In conclusion, the human brain has several attentional systems that play a criti
         },
         {
             title:"Zone 2 Exercise: A Transformational Technique for Enhanced Physical and Mental Well-Being",
+            eventName:"article_Zone2",
             descriptionShort:"Maximize mental health: the benefits of zone 2 exercise for mind-body wellness.",
             content:
             <View>
@@ -511,18 +516,20 @@ In conclusion, Zone 2 exercise has a significant impact on mental health and wel
 
 
   return (
-    <View style={{width:width, height:height}}>
-    <LinearGradient 
+    <View style={[tw`flex-1 ${Platform.OS=="android" && `bg-black`}`,{width:width, height:height}]}>
+    {Platform.OS != 'android' &&
+  <LinearGradient 
+  
+  colors={['#182E77','#EA1D3F']}
+  start={{x:0.05, y:0.6}}
+  end={{x:0.9, y:0.3}}
+  locations={[0.1,0.99]}
+  
+  
+  style={{width:width, height:height, opacity:0.65}}
+  />
+  }
     
-    colors={['#182E77','#EA1D3F']}
-    start={{x:0.05, y:0.6}}
-    end={{x:0.9, y:0.3}}
-    locations={[0.1,0.99]}
-    
-    
-    style={{width:width, height:height, opacity:0.65}}
-    >
-    </LinearGradient>
     <View style={[tw`flex-1 justify-start mt-15 `,{height:height, width:width, opacity:1, position:'absolute'}]}>
         <ScrollView
         
@@ -544,7 +551,7 @@ In conclusion, Zone 2 exercise has a significant impact on mental health and wel
             renderItem={(itemData)=> {
                 return(
                     <TouchableOpacity  onPress={async ()=> {
-                        await analytics().logEvent('article',{
+                        await analytics().logEvent(`${itemData.item.eventName}`,{
                             id:itemData.item.title
                         })
                         navigation.navigate({name:'ContentScreen', params: {fullArticle:itemData.item, content:itemData.item.content, contentImage: itemData.item.articleImage}})
@@ -576,7 +583,7 @@ In conclusion, Zone 2 exercise has a significant impact on mental health and wel
             renderItem={(itemData)=> {
                 return(
                     <TouchableOpacity  onPress={async ()=> {
-                        await analytics().logEvent('article', {
+                        await analytics().logEvent(`${itemData.item.eventName}`, {
                             id:itemData.item.title
                         })
                         navigation.navigate({name:'ContentScreen', params: {fullArticle:itemData.item, content:itemData.item.content, contentImage: itemData.item.articleImage}})

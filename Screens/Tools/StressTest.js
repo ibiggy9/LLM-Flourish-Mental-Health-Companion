@@ -11,6 +11,7 @@ import BackButton from '../../Components/BackButton';
 import { LinearGradient } from 'expo-linear-gradient';
 import InstructionSlider from '../../Components/ExerciseComponents/InstructionSlider';
 import analytics from '@react-native-firebase/analytics';
+import MarginWrapper from '../MarginWrapper';
 
 
 export default function StressTest({navigation}) {
@@ -319,7 +320,7 @@ export default function StressTest({navigation}) {
 
   async function saveScore(){
     console.log("saving score")
-    await analytics().logEvent("stressTestResults",{id:score})
+    await analytics().logEvent(`stressTestResults_${score}`,{id:score})
   }
 
   useEffect(()=> {
@@ -367,18 +368,20 @@ export default function StressTest({navigation}) {
   }
 
   return (
-    <View style={{width:width, height:height}}>
-    <LinearGradient 
-    
-    colors={['#27178C','#8C4917']}
-    start={{x:0.05, y:0.6}}
-    end={{x:0.9, y:0.3}}
-    locations={[0.1,0.99]}
-    
-    
-    style={{width:width, height:height, opacity:0.65}}
-    >
-    </LinearGradient>
+    <View style={[tw`flex-1 ${Platform.OS=="android" && `bg-black`}`,{width:width, height:height}]}>
+      <MarginWrapper>
+    {Platform.OS != 'android' &&
+  <LinearGradient 
+  
+  colors={['#182E77','#EA1D3F']}
+  start={{x:0.05, y:0.6}}
+  end={{x:0.9, y:0.3}}
+  locations={[0.1,0.99]}
+  
+  
+  style={{width:width, height:height, opacity:0.65}}
+  />
+  }
     <View style={[tw`flex-1 justify-start `,{height:height, width:width, opacity:1, position:'absolute'}]}>
     <AnimatePresence style={{height:1, width:1}}>
     
@@ -398,7 +401,7 @@ export default function StressTest({navigation}) {
     </MotiView>
 
    
-    <View style={tw`justify-end  items-center  flex-1`}>
+    <View style={tw`justify-end  items-center  `}>
     <TouchableOpacity style={tw``} onPress={()=> next()}>
     <MotiText key="b" from={{opacity:0}} animate={{opacity:1}}  transition={{type:'timing', duration:500, easing:Easing.easing}}  style={tw`items-center justify-center text-white m-4 pb-40 text-left text-2xl`}>Next</MotiText>
     </TouchableOpacity>
@@ -578,6 +581,7 @@ export default function StressTest({navigation}) {
        
     </AnimatePresence>
    </View>
+   </MarginWrapper>
    </View>
   )
 }

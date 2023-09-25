@@ -130,7 +130,7 @@ export default function OnBoarding({navigation}) {
 
   const welcomeMessage = [
     {instructionTitle:"Message From The Developer"},
-    {instructionTitle:"Mental Flourishing", instructionShort:"The absence of mental illness is not mental health. Flourish provides tools to help support your mental health with the aim to help you not just live, but Flourish.", image:<Image  style={[tw` rounded-xl `, {height:height/2.8, width:width/1.2}]} source={require('../../assets/onboardingImage.jpg')}/>},
+    {instructionTitle:"Mental Flourishing", instructionShort:"The absence of mental illness is not mental health. Flourish provides tools to help support your mental health with the aim to help you not just live, but Flourish.", image:<Image  style={[tw` rounded-xl `, {height:height/2.2, width:width/1.2}]} source={require('../../assets/onboardingImage.jpg')}/>},
     {instructionTitle:"What Can Flourish Do?"},
     {instructionTitle:"Agree To Our Policies"},
   ]
@@ -139,6 +139,7 @@ export default function OnBoarding({navigation}) {
     {
       uc:"Fleur, Your AI Therapist®", 
       refName:"fleurRef", 
+      eventName:"fleur_onBoardingClick",
       ref:fleurRef,
       title:'Introducing Fleur',
       content:"Fleur is an AI-powered therapist. She can answer (pretty much) any question you have related to your mental health. She can even provide advice and guide you through specific exercises like planning, reflecting on an experience and much more."
@@ -147,6 +148,7 @@ export default function OnBoarding({navigation}) {
     {
       uc:"Cognitive Behavioural Therapy", 
       refName:"cbtRef", 
+      eventName:"cbt_onBoardingClick",
       ref:cbtRef,
       title:"What is CBT?",
       content:"Cognitive Behavioural Therapy (CBT) is a type of therapy that helps people change unhelpful patterns of thinking and behaviour that can cause or worsen mental health problems. Our CBT tool can guide you through a personalized experience that helps you reframe specific experiences you've gone through to help create greater mental resilience."
@@ -154,6 +156,7 @@ export default function OnBoarding({navigation}) {
     {
       uc:"Personalized Structured Reflection", 
       refName:"reflectionRef", 
+      eventName:"reflect_onBoardingClick",
       ref:reflectionRef, 
       title:"Better Thinking With AI",
       content:"Life's challenges are often complicated. Our Reflect AI tool can be used to help break things down and think them through. All you do is describe your situation and the AI will provide you with helpful questions to help you think through your challenge."
@@ -161,6 +164,7 @@ export default function OnBoarding({navigation}) {
     {
       uc:"Personalized Goal Setting", 
       refName:"goalRef", 
+      eventName:"goals_onBoardingClick",
       ref:goalRef,
       title:"Goal Setting With AI",
       content:"Setting goals is an art and the science. When done properly, goals help us feel motivated to do the things we wish to do. But too often we can articulate them in an unhelpful way, leaving them to vague or missing key details that make it actionable. Our AI Goal setting tool helps take your general intention and articulate it as a goal, then provides you with a sample implementation plan personalized to your aims."
@@ -168,6 +172,7 @@ export default function OnBoarding({navigation}) {
     {
       uc:"Science-Based Breathwork", 
       refName:"breathRef", 
+      eventName:"breath_onBoardingClick",
       ref:breathRef,
       title:"The Power Of Breathwork",
       content:"Breathing can be thought of as a behavioural wedge into your mind. Effect breath can very quickly improve our mood, mental state and energy levels while reducing stress. Our breathing tools leverage the latest on breathing science to create a powerful effect in just a few minutes."
@@ -175,6 +180,7 @@ export default function OnBoarding({navigation}) {
     {
       uc:"Mental Health Assessments", 
       refName:"mental", 
+      eventName:"mentalTests_onBoardingClick",
       ref:mental,
       title:"Assess Your Mental Health",
       content:"It can be difficult to know how you're really doing. Some are very in tune with their internal states and feelings while others, less so. Our mental health assessments can help with this. They can give you a loose reading on the severity of your anixety or depression, help you understand your current stress levels and give you a sense of how mentally health you may be."
@@ -183,6 +189,7 @@ export default function OnBoarding({navigation}) {
     {
       uc:"Focus & Productivity Tools", 
       refName:"focus", 
+      eventName:"focus_onBoardingClick",
       ref:focus,
       title:"Focus On What Your Need To Do",
       content:"A common source of stress is procrastination. Our focus and productivity tracks help you get down to work by leveraging audio that has been shown to encourage the brain to fall into a more focused state."
@@ -275,7 +282,7 @@ export default function OnBoarding({navigation}) {
         renderItem={(itemData)=> {
           return(
             
-            <View style={[{height:height/1.43, width:width}, tw`flex-1 justify-start mt-3 items-center`]}>
+            <View style={[{height:height/1.3, width:width}, tw`flex-1 justify-start mt-3 items-center`]}>
               <View style={[tw`flex-1 bg-slate-600 bg-opacity-40 rounded-2xl items-center mb-3 `, {width:width-40, height: height/2.7}]}>
               
               {itemData.index == 0 &&
@@ -286,7 +293,7 @@ export default function OnBoarding({navigation}) {
               
               <Text style={[tw`text-white  text-center mt-7 font-bold`, {fontSize:25}]}>{itemData.item.instructionTitle}</Text>
               <View style={tw`items-center my-4`}>
-              <FontAwesome name="hand-peace-o" size={124} color="white" />
+              <FontAwesome name="hand-peace-o" size={80} color="white" />
               </View>
               <Text style={[tw`text-white text-start mx-4 mt-3`, {fontSize:16}]}>Hey, </Text>
               <Text style={[tw`text-white text-start mx-4 mt-3`, {fontSize:16}]}>Thanks for checking out our app. Our goal is to provide a low cost option for ongoing mental wellness support.</Text>
@@ -294,7 +301,7 @@ export default function OnBoarding({navigation}) {
               <Text style={[tw`text-white text-start mx-4 mt-3`, {fontSize:16}]}>With that said, we'd really appreciate any feedback you might have. Whether that be bugs, crashes or feature requests. So if you have any feedback, please feel free to go to the support section under "Profile" or send us a note to:</Text>
               <Text style={[tw`text-blue-400 underline text-start mx-4 mt-3`, {fontSize:16}]}>support@flourishtech.app</Text>
               <Text style={[tw`text-white text-start mx-4 mt-3`, {fontSize:16}]}>Thank you and welcome!</Text>
-              <Text style={[tw`text-white text-start mx-4 mt-3`, {fontSize:16}]}>Iain</Text>
+              <Text style={[tw`text-white text-start mx-4 mt-3`, {fontSize:16}]}>Ian</Text>
               
               </View>
               </View>
@@ -325,7 +332,7 @@ export default function OnBoarding({navigation}) {
               {useCases.map((item)=> 
               <>
               <TouchableOpacity onPress={async ()=> {
-                await analytics().logEvent('onboardingClick', {
+                await analytics().logEvent(`${item.eventName}`, {
                   id:item.title
                 })
                 openModal(item.refName)
@@ -354,7 +361,7 @@ export default function OnBoarding({navigation}) {
                 onValueChange={() => setPrivacy(!privacy)}
                 style={tw`items-center justify-center mt-2 p-3`}
                 />
-              <TouchableOpacity onPress={()=> openPrivacy()}>
+              <TouchableOpacity style={tw`items-center justify-center mt-2`} onPress={()=> openPrivacy()}>
               <Text style={[tw`items-center justify-center text-lg text-white text-start mx-2`]}>By checking this box you agree to Flourish's <Text style={tw`text-blue-300  text-lg`}>Privacy Policy</Text> </Text>
               </TouchableOpacity>
               </View>
@@ -367,8 +374,8 @@ export default function OnBoarding({navigation}) {
                 color={"white"}
                 style={[tw`items-center justify-center mt-2 p-3`]}
                 />
-              <TouchableOpacity onPress={()=> navigation.navigate('Reminder', {title:'Disclaimer', description:disclaimer})}>
-              <Text style={[tw`items-center justify-center text-lg text-white text-start mx-2`]}>By checking this box you understand to Flourish's <Text style={tw`text-blue-300 text-lg`}>User Disclaimer</Text> </Text>
+              <TouchableOpacity style={tw`items-center justify-center mt-2`} onPress={()=> navigation.navigate('Reminder', {title:'Disclaimer', description:disclaimer})}>
+              <Text style={[tw`items-center justify-center text-lg text-white text-start mx-2`]}>By checking this box you understand and agree to Flourish's <Text style={tw`text-blue-300 text-lg`}>User Disclaimer</Text> </Text>
               </TouchableOpacity>
               </View>
 

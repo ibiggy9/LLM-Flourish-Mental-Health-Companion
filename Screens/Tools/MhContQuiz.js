@@ -8,6 +8,7 @@ import BackButton from '../../Components/BackButton';
 import { LinearGradient } from 'expo-linear-gradient'
 import InstructionSlider from '../../Components/ExerciseComponents/InstructionSlider'
 import analytics from '@react-native-firebase/analytics';
+import MarginWrapper from '../MarginWrapper'
 
 export default function MhContQuiz({navigation}) {
   const{height, width} = useWindowDimensions()
@@ -207,7 +208,7 @@ async function scoringChange(e, qNum, option_num){
 
   async function saveScore(){
     console.log('pushing analytics')
-    await analytics().logEvent('continuummTestResult', {id:finalScore})
+    await analytics().logEvent(`ContinuummScore_${finalScore}`, {id:finalScore})
   }
 
   useEffect(()=>{
@@ -229,22 +230,26 @@ async function scoringChange(e, qNum, option_num){
 
   return (
     
-    <View style={{width:width, height:height}}>
-    <LinearGradient 
-    
-    colors={['#27178C','#8C4917']}
-    start={{x:0.05, y:0.6}}
-    end={{x:0.9, y:0.3}}
-    locations={[0.1,0.99]}
-    
-    
-    style={{width:width, height:height, opacity:0.65}}
-    >
-    </LinearGradient>
+    <View style={[tw`flex-1 ${Platform.OS=="android" && `bg-black`}`,{width:width, height:height}]}>
+      <MarginWrapper>
+    {Platform.OS != 'android' &&
+  <LinearGradient 
+  
+  colors={['#182E77','#EA1D3F']}
+  start={{x:0.05, y:0.6}}
+  end={{x:0.9, y:0.3}}
+  locations={[0.1,0.99]}
+  
+  
+  style={{width:width, height:height, opacity:0.65}}
+  />
+  }
     <View style={[tw`flex-1 justify-start pb-40`,{height:height, width:width, opacity:1, position:'absolute'}]}>
     <View style={{height:height, width:width}}>
     {step!=14 && 
+    
     <BackButton navigation={navigation} />
+    
     }
     
     {instructions === true ?
@@ -267,10 +272,10 @@ async function scoringChange(e, qNum, option_num){
     
     <Animated.View style={{opacity:questionFade}}>
     <MotiView key={'c'} from={{opacity:0, scale:0.7}} animate={{opacity:1, scale:1}}  transition={{type:'timing', duration:800, easing:Easing.easing}}>
-    <Text style={tw`text-xl mx-10 text-white text-left font-bold`}>{quiz[step].question}</Text>
+    <Text style={tw`text-lg mx-7 mt-5 text-white text-left font-bold`}>{quiz[step].question}</Text>
     
   
-    <View style={tw`flex flex-col justify-between items-center mt-10`}>
+    <View style={tw`flex flex-col justify-between items-center mt-5`}>
     <TouchableOpacity   onPress={(e)=> scoringChange(e, step, "option_1")}  >
       <View style={tw`border border-white rounded-xl p-3 w-80 m-3`}> 
       <Text  style={tw`text-lg text-center text-white font-light`} >{quiz[step].option_1}</Text>
@@ -321,7 +326,7 @@ async function scoringChange(e, qNum, option_num){
       <View>
         <Text style={tw`text-4xl text-white mt-10`}>Languishing</Text>
         <Text style={tw`text-lg text-white`}>Your results indicate that you are currently experiencing a state of "languishing." This means that you may be struggling with feelings of boredom, dissatisfaction, and emptiness, and that your overall well-being may be compromised. It's important to recognize that this is a common experience, and that there are resources and support available to help improve your mental health. It may be helpful to speak with a mental health professional, engage in self-care practices, and reach out to loved ones for support. With care and attention, it is possible to regain a sense of purpose and fulfillment in life.</Text>
-        <Text style={tw`text-sm text-slate-300 font-light mt-10`}>Disclaimer: This tool cannot diagnose any mental health-related illness. If you suspect that you are in need of professional mental health care, please contact a licensed mental health professional to get help.</Text>
+        <Text style={tw`text-sm text-slate-300 font-light mt-3`}>Disclaimer: This tool cannot diagnose any mental health-related illness. If you suspect that you are in need of professional mental health care, please contact a licensed mental health professional to get help.</Text>
       </View>
 
     } 
@@ -330,7 +335,7 @@ async function scoringChange(e, qNum, option_num){
       <ScrollView>
       <Text style={tw`text-3xl text-white mt-10`}>Flourishing</Text>
       <Text style={tw`text-lg text-white`}>Your recent mental health assessment results indicate that you are currently experiencing a state of "flourishing." This means that you have a high level of well-being and are thriving in both your personal and professional life. You are likely experiencing positive emotions and meaningful relationships, as well as a sense of purpose and satisfaction. This is a great accomplishment and it's important to continue practicing self-care and seeking support from loved ones to maintain your mental health. Remember to acknowledge and celebrate your successes and to stay mindful of any challenges that may arise.</Text>
-      <Text style={tw`text-sm text-slate-300 font-light mt-10`}>Disclaimer: This tool cannot diagnose any mental health related illness. If you suspect that you are in need of professional mental health care, please contact a licensed mental health professional to get help.</Text>
+      <Text style={tw`text-sm text-slate-300 font-light mt-3`}>Disclaimer: This tool cannot diagnose any mental health related illness. If you suspect that you are in need of professional mental health care, please contact a licensed mental health professional to get help.</Text>
     </ScrollView>
     }
     
@@ -338,7 +343,7 @@ async function scoringChange(e, qNum, option_num){
      <View>
      <Text style={tw`text-3xl text-white mt-10`}>Moderate Mental Health</Text>
      <Text style={tw`text-lg text-white`}>Your results indicate that you have moderate mental health. This means that you may be experiencing some stress, challenges or difficulties in your daily life that are affecting your well-being, but you are also still able to find joy, meaning and purpose in life. It's important to keep in mind that everyone goes through ups and downs and it's okay to not always feel your best. There are ways to support and improve your mental health, such as through self-care, therapy, and seeking support from loved ones</Text>
-     <Text style={tw`text-sm text-slate-300 font-light mt-10`}>Disclaimer: This tool cannot diagnose any mental health related illness. If you suspect that you are in need of professional mental health care, do not  a licensed mental health professional to get help.</Text>
+     <Text style={tw`text-sm text-slate-300 font-light mt-3`}>Disclaimer: This tool cannot diagnose any mental health related illness. If you suspect that you are in need of professional mental health care, do not  a licensed mental health professional to get help.</Text>
    </View>
     }
   
@@ -360,6 +365,7 @@ async function scoringChange(e, qNum, option_num){
     
     </View>
     </View>
+    </MarginWrapper>
     </View>
   )
   
